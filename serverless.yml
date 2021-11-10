@@ -1,0 +1,90 @@
+service: create-update-product
+
+frameworkversion: '2'
+
+plugins:
+  - serverless-localstack
+  - serverless-step-functions
+  - serverless-deployment-bucket
+  - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function
+custom:
+  bucket: lambda-create-update-product
+  localstack:
+    debug: true
+    stages:
+      -local
+    endpointfile: configs/localstack_endpoints.json
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-2'}
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  environment:
+    NODE_ENV: ${opt:stage, 'dev'}
+    REGION: ${opt:region, 'us-east-2'}
+  deploymentBucket:
+    name: lambda-create-update-product
+    serverSideEncryption: AES256
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'states:StartExecution'
+        - ses:SendEmail
+        - ses:SendRawEmail
+      Resource:
+        - arn:aws:states:${self:provider.region}:#{AWS::AccountId}:stateMachine:CreateUpdateProduct
+        - arn:aws:lambda:us-east-2:268769556228:function:create-update-product-dev-send-email
+        - arn:aws:iam::268769556228:role/create-update-product-dev-CreateUpdateProductRole-1PMCOP5OSXOCX
+
+functions:
+  process-notification:
+    handler: src/index.handle
+    timeout: 30 # Default is 6
+  create-product:
+    handler: src/products/create.handle
+    timeout: 30 # Default is 6
+  update-product:
+    handler: src/products/update.handle
+    timeout: 30 # Default is 6
+  check-exists-product:
+    handler: src/products/check.handle
+    timeout: 30 # Default is 6
+  send-email:
+    handler: src/helpers/sendEmail.handle
+    timeout: 300 # Default is 6  
+  
+stepFunctions:
+  stateMachines:
+    createUpdateProduct:
+      name: CreateUpdateProduct
+      definition:
+        Comment: ''
+        StartAt: CheckExists
+        States:
+          CheckExists:
+            Type: Task
+            Next: CreateUpdateProduct
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-check-exists-product
+          CreateUpdateProduct:
+            Type: Parallel
+            Next: SendEmail
+            Branches:
+              - StartAt: CreateProduct
+                States:
+                  CreateProduct:
+                    Type: Task
+                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-create-product
+                    End: true
+              - StartAt: UpdateProduct
+                States:
+                  UpdateProduct:
+                    Type: Task
+                    Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-update-product
+                    End: true
+          SendEmail:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-send-email
+            End: true     

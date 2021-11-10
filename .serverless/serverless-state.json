@@ -1,0 +1,676 @@
+{
+  "service": {
+    "service": "create-update-product",
+    "serviceObject": {
+      "name": "create-update-product"
+    },
+    "provider": {
+      "name": "aws",
+      "stage": "dev",
+      "region": "us-east-2",
+      "runtime": "nodejs12.x",
+      "lambdaHashingVersion": "20201221",
+      "environment": {
+        "NODE_ENV": "dev",
+        "REGION": "us-east-2"
+      },
+      "deploymentBucket": "lambda-create-update-product",
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "states:StartExecution",
+            "ses:SendEmail",
+            "ses:SendRawEmail"
+          ],
+          "Resource": [
+            {
+              "Fn::Sub": "arn:aws:states:us-east-2:${AWS::AccountId}:stateMachine:CreateUpdateProduct"
+            },
+            "arn:aws:lambda:us-east-2:268769556228:function:create-update-product-dev-send-email",
+            "arn:aws:iam::268769556228:role/create-update-product-dev-CreateUpdateProductRole-1PMCOP5OSXOCX"
+          ]
+        }
+      ],
+      "versionFunctions": true,
+      "deploymentBucketObject": {
+        "name": "lambda-create-update-product",
+        "serverSideEncryption": "AES256"
+      },
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ProcessDashnotificationLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/create-update-product-dev-process-notification"
+            }
+          },
+          "CreateDashproductLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/create-update-product-dev-create-product"
+            }
+          },
+          "UpdateDashproductLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/create-update-product-dev-update-product"
+            }
+          },
+          "CheckDashexistsDashproductLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/create-update-product-dev-check-exists-product"
+            }
+          },
+          "SendDashemailLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/create-update-product-dev-send-email"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "create-update-product",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/create-update-product-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/create-update-product-dev*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "create-update-product",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "ProcessDashnotificationLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "lambda-create-update-product",
+                "S3Key": "serverless/create-update-product/dev/1636556400555-2021-11-10T15:00:00.555Z/create-update-product.zip"
+              },
+              "Handler": "src/index.handle",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "create-update-product-dev-process-notification",
+              "MemorySize": 1024,
+              "Timeout": 30,
+              "Environment": {
+                "Variables": {
+                  "NODE_ENV": "dev",
+                  "REGION": "us-east-2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ProcessDashnotificationLogGroup"
+            ]
+          },
+          "CreateDashproductLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "lambda-create-update-product",
+                "S3Key": "serverless/create-update-product/dev/1636556400555-2021-11-10T15:00:00.555Z/create-update-product.zip"
+              },
+              "Handler": "src/products/create.handle",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "create-update-product-dev-create-product",
+              "MemorySize": 1024,
+              "Timeout": 30,
+              "Environment": {
+                "Variables": {
+                  "NODE_ENV": "dev",
+                  "REGION": "us-east-2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CreateDashproductLogGroup"
+            ]
+          },
+          "UpdateDashproductLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "lambda-create-update-product",
+                "S3Key": "serverless/create-update-product/dev/1636556400555-2021-11-10T15:00:00.555Z/create-update-product.zip"
+              },
+              "Handler": "src/products/update.handle",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "create-update-product-dev-update-product",
+              "MemorySize": 1024,
+              "Timeout": 30,
+              "Environment": {
+                "Variables": {
+                  "NODE_ENV": "dev",
+                  "REGION": "us-east-2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "UpdateDashproductLogGroup"
+            ]
+          },
+          "CheckDashexistsDashproductLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "lambda-create-update-product",
+                "S3Key": "serverless/create-update-product/dev/1636556400555-2021-11-10T15:00:00.555Z/create-update-product.zip"
+              },
+              "Handler": "src/products/check.handle",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "create-update-product-dev-check-exists-product",
+              "MemorySize": 1024,
+              "Timeout": 30,
+              "Environment": {
+                "Variables": {
+                  "NODE_ENV": "dev",
+                  "REGION": "us-east-2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CheckDashexistsDashproductLogGroup"
+            ]
+          },
+          "SendDashemailLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "lambda-create-update-product",
+                "S3Key": "serverless/create-update-product/dev/1636556400555-2021-11-10T15:00:00.555Z/create-update-product.zip"
+              },
+              "Handler": "src/helpers/sendEmail.handle",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "create-update-product-dev-send-email",
+              "MemorySize": 1024,
+              "Timeout": 300,
+              "Environment": {
+                "Variables": {
+                  "NODE_ENV": "dev",
+                  "REGION": "us-east-2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "SendDashemailLogGroup"
+            ]
+          },
+          "ProcessDashnotificationLambdaVersionDCOuLEQn5QqQEijgwKsV8WUXFj0ypURJJBhwDZAI1E": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ProcessDashnotificationLambdaFunction"
+              },
+              "CodeSha256": "Z5wz5BH3YdrLE9ueF+Avh2PZO/gRxcne6iOBBc6k66I="
+            }
+          },
+          "CreateDashproductLambdaVersionemydsioMtOuurdPF0TFAyqlJymdL5IUtODmPf8Qkw": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateDashproductLambdaFunction"
+              },
+              "CodeSha256": "Z5wz5BH3YdrLE9ueF+Avh2PZO/gRxcne6iOBBc6k66I="
+            }
+          },
+          "UpdateDashproductLambdaVersionzm3nZF3vpEVhLGbdPCM7ADvfFD9YhFhpxuI5L8cH8Is": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "UpdateDashproductLambdaFunction"
+              },
+              "CodeSha256": "Z5wz5BH3YdrLE9ueF+Avh2PZO/gRxcne6iOBBc6k66I="
+            }
+          },
+          "CheckDashexistsDashproductLambdaVersionQmhqqJDdsaYYGbsHDaSO2urkhnpTZylIz6wiBYkIEc": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CheckDashexistsDashproductLambdaFunction"
+              },
+              "CodeSha256": "Z5wz5BH3YdrLE9ueF+Avh2PZO/gRxcne6iOBBc6k66I="
+            }
+          },
+          "SendDashemailLambdaVersionVabswcfswQgtw6kDOvzTJSZhyxcPxsMTRZ41Jivgfs": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "SendDashemailLambdaFunction"
+              },
+              "CodeSha256": "Z5wz5BH3YdrLE9ueF+Avh2PZO/gRxcne6iOBBc6k66I="
+            }
+          },
+          "CreateUpdateProductRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "states.us-east-2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": "dev-us-east-2-create-update-product-statemachine",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "lambda:InvokeFunction"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-check-exists-product"
+                          },
+                          {
+                            "Fn::Sub": [
+                              "${functionArn}:*",
+                              {
+                                "functionArn": {
+                                  "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-check-exists-product"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-create-product"
+                          },
+                          {
+                            "Fn::Sub": [
+                              "${functionArn}:*",
+                              {
+                                "functionArn": {
+                                  "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-create-product"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-update-product"
+                          },
+                          {
+                            "Fn::Sub": [
+                              "${functionArn}:*",
+                              {
+                                "functionArn": {
+                                  "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-update-product"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-send-email"
+                          },
+                          {
+                            "Fn::Sub": [
+                              "${functionArn}:*",
+                              {
+                                "functionArn": {
+                                  "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-send-email"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "CreateUpdateProduct": {
+            "Type": "AWS::StepFunctions::StateMachine",
+            "Properties": {
+              "DefinitionString": {
+                "Fn::Sub": "{\n  \"Comment\": \"\",\n  \"StartAt\": \"CheckExists\",\n  \"States\": {\n    \"CheckExists\": {\n      \"Type\": \"Task\",\n      \"Next\": \"CreateUpdateProduct\",\n      \"Resource\": \"arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-check-exists-product\"\n    },\n    \"CreateUpdateProduct\": {\n      \"Type\": \"Parallel\",\n      \"Next\": \"SendEmail\",\n      \"Branches\": [\n        {\n          \"StartAt\": \"CreateProduct\",\n          \"States\": {\n            \"CreateProduct\": {\n              \"Type\": \"Task\",\n              \"Resource\": \"arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-create-product\",\n              \"End\": true\n            }\n          }\n        },\n        {\n          \"StartAt\": \"UpdateProduct\",\n          \"States\": {\n            \"UpdateProduct\": {\n              \"Type\": \"Task\",\n              \"Resource\": \"arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-update-product\",\n              \"End\": true\n            }\n          }\n        }\n      ]\n    },\n    \"SendEmail\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:create-update-product-dev-send-email\",\n      \"End\": true\n    }\n  }\n}"
+              },
+              "RoleArn": {
+                "Fn::GetAtt": [
+                  "CreateUpdateProductRole",
+                  "Arn"
+                ]
+              },
+              "StateMachineName": "CreateUpdateProduct"
+            },
+            "DependsOn": [
+              "CreateUpdateProductRole"
+            ]
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "lambda-create-update-product",
+            "Export": {
+              "Name": "sls-create-update-product-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "ProcessDashnotificationLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ProcessDashnotificationLambdaVersionDCOuLEQn5QqQEijgwKsV8WUXFj0ypURJJBhwDZAI1E"
+            },
+            "Export": {
+              "Name": "sls-create-update-product-dev-ProcessDashnotificationLambdaFunctionQualifiedArn"
+            }
+          },
+          "CreateDashproductLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateDashproductLambdaVersionemydsioMtOuurdPF0TFAyqlJymdL5IUtODmPf8Qkw"
+            },
+            "Export": {
+              "Name": "sls-create-update-product-dev-CreateDashproductLambdaFunctionQualifiedArn"
+            }
+          },
+          "UpdateDashproductLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "UpdateDashproductLambdaVersionzm3nZF3vpEVhLGbdPCM7ADvfFD9YhFhpxuI5L8cH8Is"
+            },
+            "Export": {
+              "Name": "sls-create-update-product-dev-UpdateDashproductLambdaFunctionQualifiedArn"
+            }
+          },
+          "CheckDashexistsDashproductLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CheckDashexistsDashproductLambdaVersionQmhqqJDdsaYYGbsHDaSO2urkhnpTZylIz6wiBYkIEc"
+            },
+            "Export": {
+              "Name": "sls-create-update-product-dev-CheckDashexistsDashproductLambdaFunctionQualifiedArn"
+            }
+          },
+          "SendDashemailLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "SendDashemailLambdaVersionVabswcfswQgtw6kDOvzTJSZhyxcPxsMTRZ41Jivgfs"
+            },
+            "Export": {
+              "Name": "sls-create-update-product-dev-SendDashemailLambdaFunctionQualifiedArn"
+            }
+          },
+          "CreateUpdateProductArn": {
+            "Description": "Current StateMachine Arn",
+            "Value": {
+              "Ref": "CreateUpdateProduct"
+            },
+            "Export": {
+              "Name": "sls-create-update-product-dev-CreateUpdateProductArn"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "custom": {
+      "bucket": "lambda-create-update-product",
+      "localstack": {
+        "debug": true,
+        "stages": "-local",
+        "endpointfile": "configs/localstack_endpoints.json"
+      }
+    },
+    "plugins": [
+      "serverless-localstack",
+      "serverless-step-functions",
+      "serverless-deployment-bucket",
+      "serverless-pseudo-parameters",
+      "serverless-iam-roles-per-function"
+    ],
+    "pluginsData": {},
+    "functions": {
+      "process-notification": {
+        "handler": "src/index.handle",
+        "timeout": 30,
+        "events": [],
+        "name": "create-update-product-dev-process-notification",
+        "package": {},
+        "memory": 1024,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "ProcessDashnotificationLambdaVersionDCOuLEQn5QqQEijgwKsV8WUXFj0ypURJJBhwDZAI1E"
+      },
+      "create-product": {
+        "handler": "src/products/create.handle",
+        "timeout": 30,
+        "events": [],
+        "name": "create-update-product-dev-create-product",
+        "package": {},
+        "memory": 1024,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "CreateDashproductLambdaVersionemydsioMtOuurdPF0TFAyqlJymdL5IUtODmPf8Qkw"
+      },
+      "update-product": {
+        "handler": "src/products/update.handle",
+        "timeout": 30,
+        "events": [],
+        "name": "create-update-product-dev-update-product",
+        "package": {},
+        "memory": 1024,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "UpdateDashproductLambdaVersionzm3nZF3vpEVhLGbdPCM7ADvfFD9YhFhpxuI5L8cH8Is"
+      },
+      "check-exists-product": {
+        "handler": "src/products/check.handle",
+        "timeout": 30,
+        "events": [],
+        "name": "create-update-product-dev-check-exists-product",
+        "package": {},
+        "memory": 1024,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "CheckDashexistsDashproductLambdaVersionQmhqqJDdsaYYGbsHDaSO2urkhnpTZylIz6wiBYkIEc"
+      },
+      "send-email": {
+        "handler": "src/helpers/sendEmail.handle",
+        "timeout": 300,
+        "events": [],
+        "name": "create-update-product-dev-send-email",
+        "package": {},
+        "memory": 1024,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "SendDashemailLambdaVersionVabswcfswQgtw6kDOvzTJSZhyxcPxsMTRZ41Jivgfs"
+      }
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless.yml",
+    "initialServerlessConfig": {
+      "service": {
+        "$ref": "$[\"service\"][\"serviceObject\"]"
+      },
+      "frameworkversion": "2",
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "custom": {
+        "$ref": "$[\"service\"][\"custom\"]"
+      },
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "stepFunctions": {
+        "stateMachines": {
+          "createUpdateProduct": {
+            "name": "CreateUpdateProduct",
+            "definition": {
+              "Comment": "",
+              "StartAt": "CheckExists",
+              "States": {
+                "CheckExists": {
+                  "Type": "Task",
+                  "Next": "CreateUpdateProduct",
+                  "Resource": "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:create-update-product-dev-check-exists-product"
+                },
+                "CreateUpdateProduct": {
+                  "Type": "Parallel",
+                  "Next": "SendEmail",
+                  "Branches": [
+                    {
+                      "StartAt": "CreateProduct",
+                      "States": {
+                        "CreateProduct": {
+                          "Type": "Task",
+                          "Resource": "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:create-update-product-dev-create-product",
+                          "End": true
+                        }
+                      }
+                    },
+                    {
+                      "StartAt": "UpdateProduct",
+                      "States": {
+                        "UpdateProduct": {
+                          "Type": "Task",
+                          "Resource": "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:create-update-product-dev-update-product",
+                          "End": true
+                        }
+                      }
+                    }
+                  ]
+                },
+                "SendEmail": {
+                  "Type": "Task",
+                  "Resource": "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:create-update-product-dev-send-email",
+                  "End": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "layers": {},
+    "isDashboardMonitoringPreconfigured": false,
+    "stepFunctions": {
+      "stateMachines": {
+        "$ref": "$[\"service\"][\"initialServerlessConfig\"][\"stepFunctions\"][\"stateMachines\"]"
+      },
+      "activities": []
+    },
+    "artifact": "/media/glauber/Hd/Projetos/crud/.serverless/create-update-product.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/create-update-product/dev/1636556400555-2021-11-10T15:00:00.555Z",
+    "artifact": "create-update-product.zip"
+  }
+}
