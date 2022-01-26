@@ -2,7 +2,7 @@ const { callStepFunction } = require('./helpers/helpers');
 
 module.exports.handle = async (event, context, callback) => {
     console.log('--------------Process Notification-----------------');
-
+    // Test
     const snsRecord = event.Records[0];
     const { Sns: { Message } } = snsRecord;
 
