@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'npm clean-install'
+                sh 'node --version'
             }
         }
         stage('Test') {
